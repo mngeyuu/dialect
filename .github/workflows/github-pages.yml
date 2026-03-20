@@ -34,8 +34,10 @@ jobs:
       - name: Install & build
         working-directory: dialect-frontend
         run: |
-          # Pages 仅需前端构建，跳过 postinstall(electron-builder) 以避免 CI 失败
+          # 先跳过脚本，避免 electron-builder postinstall 在 CI 中失败
           npm ci --ignore-scripts
+          # 仅补装 Electron 二进制，满足 vue-cli-plugin-electron-builder 的 require
+          node node_modules/electron/install.js
           npm run build
 
       - name: Upload artifact
