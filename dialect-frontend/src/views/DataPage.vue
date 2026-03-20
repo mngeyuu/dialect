@@ -40,10 +40,8 @@
           <th>编号</th>
           <th>词汇</th>
           <th>老派词汇</th>
-          <th>老派记音</th>
           <th>老派语音</th>
           <th>新派词汇</th>
-          <th>新派记音</th>
           <th>新派语音</th>
         </tr>
       </thead>
@@ -52,7 +50,6 @@
           <td>{{ item.code }}</td>
           <td>{{ item.word }}</td>
           <td>{{ item.old_dialect_word }}</td>
-          <td class="phonetic">{{ item.old_dialect_phonetic }}</td>
           <td class="audio-cell">
             <div v-if="item.word" class="audio-button-wrapper">
               <audio
@@ -73,7 +70,6 @@
             <span v-else>无音频</span>
           </td>
           <td>{{ item.new_dialect_word }}</td>
-          <td class="phonetic">{{ item.new_dialect_phonetic }}</td>
           <td class="audio-cell">
             <div v-if="item.word" class="audio-button-wrapper">
               <audio
@@ -194,7 +190,17 @@ export default {
       if (list.length < 2) return
       const k = this.audioSideKey(item, side)
       const idx = this.audioCandidateIdx[k] ?? 0
-      if (idx + 1 >= list.length) return
+      if (idx + 1 >= list.length) {
+        const el = this.audioRefs[audioKey]
+        const src = el ? (el.currentSrc || el.src || '(无地址)') : '(无地址)'
+        alert(
+          '无法播放该条录音。\n\n' +
+          '已尝试空格/下划线与 .mp3/.MP3 组合。\n' +
+          '请检查该文件是否已上传并可访问。\n\n' +
+          `当前请求地址：\n${src}`
+        )
+        return
+      }
       this.audioCandidateIdx[k] = idx + 1
       this.$nextTick(() => {
         const el = this.audioRefs[audioKey]
@@ -226,16 +232,8 @@ export default {
             playPromise.then(() => {
               this.isPlaying[audioKey] = true;
             }).catch((error) => {
-              console.error('播放失败:', error)
-              const src = audioElement.currentSrc || audioElement.src || '(无地址)'
-              alert(
-                '无法播放该条录音。\n\n' +
-                '常见原因：\n' +
-                '1. 尚未部署对应 mp3：请放到 public/audio/old_dialect 与 new_dialect，并重新构建/推送。\n' +
-                '2. 文件名须与「词汇」一致；支持「0001 新派 太阳.mp3」或「0001_新派_太阳.mp3」两种。\n' +
-                '3. 也可在数据里填写 old_dialect_audio / new_dialect_audio 为完整 URL 或相对路径。\n\n' +
-                `当前请求地址：\n${src}`
-              )
+              // 首个候选失败时不立即弹错，等待 onerror 自动回退下一个候选
+              console.warn('播放候选失败，准备回退下一候选:', error)
             });
           }
         })
