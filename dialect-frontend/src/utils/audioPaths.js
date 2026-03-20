@@ -36,6 +36,15 @@ function urlForFolderAndFilename (folderRel, filename) {
 }
 
 /**
+ * 仅把「看起来是具体音频文件」的自定义路径当作可用地址。
+ * 避免 custom 值是目录（如 audio/old_dialect/）时导致请求丢失文件名。
+ */
+function isAudioFilePath (p) {
+  const pure = String(p || '').split('#')[0].split('?')[0]
+  return /\.(mp3|wav|ogg|m4a)$/i.test(pure)
+}
+
+/**
  * 默认命名候选：
  * 1) 空格分隔优先，其次下划线；
  * 2) 扩展名优先 .mp3，其次 .MP3（兼容历史文件）。
@@ -67,14 +76,16 @@ export function getDialectAudioSrcCandidates (item, side) {
   ).trim()
 
   if (custom) {
-    if (/^(https?:|data:|blob:)/i.test(custom)) {
+    if (/^(https?:|data:|blob:)/i.test(custom) && isAudioFilePath(custom)) {
       return [custom]
     }
-    if (isElectron()) {
+    if (isAudioFilePath(custom) && isElectron()) {
       return [custom.replace(/^\.\//, '')]
     }
-    const rel = custom.replace(/^\.\//, '')
-    return [publicBase() + encodePathSegments(rel)]
+    if (isAudioFilePath(custom)) {
+      const rel = custom.replace(/^\.\//, '')
+      return [publicBase() + encodePathSegments(rel)]
+    }
   }
 
   const code = formatDialectCode(item.code)

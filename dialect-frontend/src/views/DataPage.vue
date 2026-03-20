@@ -107,7 +107,7 @@
       <span class="page-info">{{ currentPage }} / {{ totalPages || 1 }}</span>
       <button
         @click="nextPage"
-        :disabled="currentPage < totalPages">
+        :disabled="currentPage >= totalPages">
         下一页
       </button>
     </div>

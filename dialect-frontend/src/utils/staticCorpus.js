@@ -37,6 +37,30 @@ function normalizeList (data) {
   return null
 }
 
+function hasAnyPhonetic (list) {
+  return list.some((item) =>
+    (item.old_dialect_phonetic && String(item.old_dialect_phonetic).trim()) ||
+    (item.new_dialect_phonetic && String(item.new_dialect_phonetic).trim())
+  )
+}
+
+/**
+ * 当静态 JSON 缺少记音时，保留本地缓存中已有的记音字段，避免被空值覆盖。
+ */
+function mergeKeepLocalPhonetic (incoming, localList) {
+  if (!Array.isArray(localList) || localList.length === 0) return incoming
+  const localMap = new Map(localList.map((x) => [String(x.code || ''), x]))
+  return incoming.map((row) => {
+    const local = localMap.get(String(row.code || ''))
+    if (!local) return row
+    return {
+      ...row,
+      old_dialect_phonetic: row.old_dialect_phonetic || local.old_dialect_phonetic || '',
+      new_dialect_phonetic: row.new_dialect_phonetic || local.new_dialect_phonetic || ''
+    }
+  })
+}
+
 /**
  * @returns {Promise<boolean>} 是否成功从静态文件加载并写入 localStorage
  */
@@ -56,7 +80,16 @@ export async function loadStaticCorpusIntoStorage () {
     if (list.length === 0) {
       return false
     }
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(list))
+    let finalList = list
+    try {
+      const localRaw = localStorage.getItem(STORAGE_KEY)
+      const localList = localRaw ? JSON.parse(localRaw) : null
+      if (!hasAnyPhonetic(list)) {
+        finalList = mergeKeepLocalPhonetic(list, localList)
+      }
+    } catch (_) {}
+
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(finalList))
     return true
   } catch (e) {
     console.warn('[staticCorpus] 未加载静态语料（可忽略，将使用本地已导入数据）:', e.message)

@@ -38,6 +38,11 @@ function urlForFolderAndFilename (folderRel, filename) {
   return publicBase() + encodePathSegments(`${folderRel}/${filename}`)
 }
 
+function isAudioFilePath (p) {
+  const pure = String(p || '').split('#')[0].split('?')[0]
+  return /\.(mp3|wav|ogg|m4a)$/i.test(pure)
+}
+
 export function getDialectAudioSrcCandidates (item, side) {
   if (!item || !item.code || !item.word) return []
 
@@ -47,9 +52,11 @@ export function getDialectAudioSrcCandidates (item, side) {
   ).trim()
 
   if (custom) {
-    if (/^(https?:|data:|blob:)/i.test(custom)) return [custom]
-    const rel = custom.replace(/^\.\//, '')
-    return [publicBase() + encodePathSegments(rel)]
+    if (/^(https?:|data:|blob:)/i.test(custom) && isAudioFilePath(custom)) return [custom]
+    if (isAudioFilePath(custom)) {
+      const rel = custom.replace(/^\.\//, '')
+      return [publicBase() + encodePathSegments(rel)]
+    }
   }
 
   const code = formatDialectCode(item.code)
