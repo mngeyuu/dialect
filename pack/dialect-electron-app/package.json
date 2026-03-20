@@ -1,0 +1,124 @@
+{
+  "name": "dialect-app",
+  "version": "1.0.0",
+  "description": "方言词汇搜索应用",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder",
+    "build-win": "node scripts/mirror-pack-env.js && electron-builder --win",
+    "build-mac": "electron-builder --mac",
+    "build-linux": "electron-builder --linux",
+    "electron:serve": "electron .",
+    "prepackage": "node prepackage.js",
+    "package": "npm run prepackage && electron-builder"
+  },
+  "build": {
+    "appId": "com.yourname.dialect-app",
+    "productName": "方言档案",
+    "asar": true,
+    "asarUnpack": [
+      "node_modules/**/*"
+    ],
+    "files": [
+      "!build/**/*",
+      "!node_modules/**/*",
+      "!main.js",
+      "!preload.js",
+      "!package.json",
+      "!build/**/*",
+      "!backend/**/*",
+      "!pack-env/**/*",
+      "!pack-env-staging/**/*",
+      "**/*",
+      "!**/*.{o,hprof,orig,pyc,pyo,rbc}",
+      "!**/._*",
+      "!**/{.DS_Store,.git,.hg,.svn,CVS,RCS,SCCS,.gitignore,.gitattributes}",
+      "!**/{__pycache__,.sass-cache,*.scssc}",
+      "!{.eslintrc,.babelrc,bower.json,karma.conf.js}",
+      "!{.travis.yml,appveyor.yml,.gitlab-ci.yml}",
+      "!{.env,.env.*,.npmrc,.yarnrc}",
+      "!{npm-debug.log,yarn-error.log,yarn-debug.log}"
+    ],
+    "directories": {
+      "buildResources": "assets",
+      "output": "dist"
+    },
+    "electronDownload": {
+      "cache": "D:/111study/2025春/guochuang/pack/electron-v20.3.12-win32-x64"
+    },
+    "extraResources": [
+      {
+        "from": "resources/django-server.exe",
+        "to": "django-server.exe"
+      },
+      {
+      "from": "build/public",
+      "to": "public"
+      },
+      {
+        "from": "backend",
+        "to": "backend",
+        "filter": [
+          "**/*"
+        ]
+      },
+      {
+        "from": "pack-env-staging",
+        "to": "pack-env",
+        "filter": [
+          "**/*"
+        ]
+      },
+      {
+        "from": "audio",
+        "to": "backend/audio",
+        "filter": [
+          "**/*.mp3"
+        ]
+      }
+    ],
+    "extraFiles": [
+      {
+        "from": "start-dialect-app.bat",
+        "to": "start-dialect-app.bat"
+      }
+    ],
+    "win": {
+      "target": [
+        "nsis",
+        "portable"
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Dialect App"
+    },
+    "mac": {
+      "target": "dmg",
+      "category": "public.app-category.education"
+    },
+    "linux": {
+      "target": [
+        "AppImage",
+        "deb"
+      ],
+      "category": "Education"
+    }
+  },
+  "devDependencies": {
+    "electron": "^20.3.12",
+    "electron-builder": "^23.6.0",
+    "electron-is-dev": "^2.0.0"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "fs-extra": "^11.3.0",
+    "electron-is-dev": "^2.0.0"
+  }
+}

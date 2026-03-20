@@ -1,0 +1,38 @@
+# 依赖
+**/node_modules/
+
+# 前端构建产物（CI 会重新 build）
+dialect-frontend/dist/
+dialect-frontend/dist_electron/
+
+# Electron 打包产物与镜像环境（体积巨大）
+pack/dialect-electron-app/dist/
+pack/dialect-electron-app/pack-env/
+pack/dialect-electron-app/pack-env-staging/
+pack/dialect-electron-app/pack-env-backup/
+# Electron 内嵌的前端构建副本（可从 dialect-frontend 再拷贝生成）
+pack/dialect-electron-app/build/
+
+# 其他子项目里的 node_modules / dist
+dialect-electron-app/node_modules/
+dialect-electron-app/dist/
+
+# Python
+**/__pycache__/
+**/*.py[cod]
+*.sqlite3
+*.db
+
+# 环境变量与密钥
+.env
+.env.*
+
+# 系统与编辑器
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.log
+
+# Cursor
+.cursor/

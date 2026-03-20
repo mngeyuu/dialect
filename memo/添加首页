@@ -1,0 +1,674 @@
+# Vue项目添加方言首页设计实现方案 (使用静态地图和本地视频)
+
+根据您的要求，我们将修改方案，使用静态图片替代百度地图，并使用本地存放的视频文件。这样可以简化实现并避免依赖外部服务。
+
+## 1. 创建首页组件
+
+首先，在Vue项目的`src/views`或`src/components`目录下创建一个新的首页组件：
+
+```bash
+# 假设您在前端项目根目录
+cd src/views
+touch HomePage.vue
+```
+
+## 2. 实现HomePage.vue组件
+
+```vue
+<template>
+  <div class="home-page">
+    <!-- 主容器 -->
+    <div class="main-container">
+      <!-- 左上角资料区域 -->
+      <div class="info-section">
+        <h2 class="dialect-title">洞庭 洞庭 老城区 【中原官话-洞庭片】</h2>
+        <div class="dialect-info">
+          <p><span class="label">调查负责人：</span>无名姓</p>
+          <p><span class="label">单位：</span>洛阳理工学院</p>
+          <p><span class="label">调查简介：</span>洛阳老城区位于河南老城区，是拥有人口9.5万多，为本地带富调研的方言。近年来受化妆体系影响幕老化，近在中原普通话范畴。老城区大体以四条（东、西、南、北）为界，四条内外语音差异较小，主要变现为否定词"不"音和"出租车不用"，如"钩""圪"，四条之外读"tshy3"，四条之外有的地方读"tshou3"，都为老城人士语言口袋仓库。</p>
+        </div>
+        
+        <!-- 文档/下载区域 -->
+        <div class="document-section">
+          <h3>文档</h3>
+          <div class="document-list">
+            <div class="document-item">
+              <span>方言点基本信息</span>
+              <span class="download">↓</span>
+            </div>
+            <div class="document-item">
+              <span>方言词汇录音采访记录</span>
+              <span class="download">↓</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- 右侧地图区域 (使用静态图片) -->
+      <div class="map-section">
+        <div class="map-header">
+          <span>老城区地图</span>
+        </div>
+        <div class="static-map">
+          <img :src="require('@/assets/images/map.jpg')" alt="洛阳老城区地图">
+        </div>
+      </div>
+      
+      <!-- 清除浮动 -->
+      <div class="clearfix"></div>
+      
+      <!-- 照片区域 -->
+      <div class="photos-section">
+        <h2>历史照片</h2>
+        <div class="photo-container">
+          <div v-for="(photo, index) in photos" :key="'photo-'+index" class="photo-item">
+            <img :src="photo.url" :alt="photo.description">
+          </div>
+        </div>
+      </div>
+      
+      <!-- 视频区域 -->
+      <div class="videos-section">
+        <h2>方言视频</h2>
+        <div class="video-container">
+          <div v-for="(video, index) in videos" :key="'video-'+index" class="video-item">
+            <div class="video-thumbnail" @click="playVideo(video)">
+              <div class="play-button">▶</div>
+              <span class="video-title">{{ video.title }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- 视频播放模态框 -->
+      <div v-if="showVideoModal" class="video-modal" @click="closeVideoModal">
+        <div class="video-modal-content" @click.stop>
+          <div class="modal-header">
+            <h3>{{ currentVideo.title }}</h3>
+            <span class="close-button" @click="closeVideoModal">&times;</span>
+          </div>
+          <video ref="videoPlayer" controls autoplay width="100%">
+            <source :src="currentVideo.src" type="video/mp4">
+            您的浏览器不支持HTML5视频
+          </video>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script>
+export default {
+  name: 'HomePage',
+  data() {
+    return {
+      // 照片数据
+      photos: [
+        { url: require('@/assets/images/photo1.jpg'), description: '老城区历史建筑1' },
+        { url: require('@/assets/images/photo2.jpg'), description: '老城区历史建筑2' },
+        { url: require('@/assets/images/photo3.jpg'), description: '老城区历史建筑3' },
+        { url: require('@/assets/images/photo4.jpg'), description: '老城区历史建筑4' },
+        { url: require('@/assets/images/photo5.jpg'), description: '老城区历史建筑5' }
+      ],
+      
+      // 视频数据
+      videos: [
+        { id: 'video1', title: '当地情况', src: require('@/assets/videos/local_situation.mp4') },
+        { id: 'video2', title: '传统节日', src: require('@/assets/videos/traditional_festival.mp4') },
+        { id: 'video3', title: '个人经历', src: require('@/assets/videos/personal_experience1.mp4') },
+        { id: 'video4', title: '当地情况', src: require('@/assets/videos/local_situation2.mp4') },
+        { id: 'video5', title: '个人经历', src: require('@/assets/videos/personal_experience2.mp4') }
+      ],
+      
+      // 视频播放控制
+      showVideoModal: false,
+      currentVideo: null
+    }
+  },
+  methods: {
+    playVideo(video) {
+      this.currentVideo = video;
+      this.showVideoModal = true;
+      
+      // 在nextTick后确保video元素已经渲染并开始播放
+      this.$nextTick(() => {
+        if (this.$refs.videoPlayer) {
+          this.$refs.videoPlayer.play();
+        }
+      });
+    },
+    closeVideoModal() {
+      // 关闭模态框前暂停视频
+      if (this.$refs.videoPlayer) {
+        this.$refs.videoPlayer.pause();
+      }
+      this.showVideoModal = false;
+      this.currentVideo = null;
+    }
+  },
+  // 确保在组件销毁时清理资源
+  beforeDestroy() {
+    if (this.showVideoModal && this.$refs.videoPlayer) {
+      this.$refs.videoPlayer.pause();
+    }
+  }
+}
+</script>
+
+<style scoped>
+.home-page {
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 20px;
+  font-family: 'Microsoft YaHei', Arial, sans-serif;
+}
+
+.main-container {
+  border: 1px solid #e0e0e0;
+  padding: 15px;
+  background-color: #fff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  position: relative;
+}
+
+/* 资料区域样式 */
+.info-section {
+  float: left;
+  width: 40%;
+  padding: 15px;
+  border: 1px solid #e0e0e0;
+  background-color: #f9f9f9;
+  position: relative;
+}
+
+.dialect-title {
+  color: #d32f2f;
+  font-size: 18px;
+  margin-top: 0;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.dialect-info {
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.label {
+  font-weight: bold;
+  color: #555;
+}
+
+.document-section {
+  margin-top: 20px;
+  padding-top: 10px;
+  border-top: 1px solid #e0e0e0;
+}
+
+.document-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 0;
+  border-bottom: 1px dashed #e0e0e0;
+}
+
+.download {
+  cursor: pointer;
+  color: #d32f2f;
+}
+
+/* 地图区域样式 */
+.map-section {
+  float: right;
+  width: 58%;
+  height: 350px;
+  border: 1px solid #e0e0e0;
+  overflow: hidden;
+}
+
+.map-header {
+  background-color: #f5f5f5;
+  padding: 8px 15px;
+  border-bottom: 1px solid #e0e0e0;
+  font-weight: bold;
+}
+
+.static-map {
+  width: 100%;
+  height: calc(100% - 37px); /* 减去header高度 */
+}
+
+.static-map img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* 确保图片覆盖整个区域 */
+}
+
+.clearfix {
+  clear: both;
+}
+
+/* 照片区域样式 */
+.photos-section {
+  margin-top: 30px;
+  padding-top: 20px;
+  border-top: 2px solid #d32f2f;
+}
+
+.photos-section h2 {
+  color: #333;
+  font-size: 20px;
+  margin-bottom: 15px;
+}
+
+.photo-container {
+  display: flex;
+  overflow-x: auto;
+  padding: 10px 0;
+}
+
+.photo-item {
+  flex: 0 0 auto;
+  width: 200px;
+  height: 150px;
+  margin-right: 15px;
+  border: 1px solid #e0e0e0;
+  overflow: hidden;
+}
+
+.photo-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s;
+}
+
+.photo-item img:hover {
+  transform: scale(1.05);
+}
+
+/* 视频区域样式 */
+.videos-section {
+  margin-top: 30px;
+  padding-top: 20px;
+  border-top: 2px solid #d32f2f;
+}
+
+.videos-section h2 {
+  color: #333;
+  font-size: 20px;
+  margin-bottom: 15px;
+}
+
+.video-container {
+  display: flex;
+  overflow-x: auto;
+  padding: 10px 0;
+}
+
+.video-item {
+  flex: 0 0 auto;
+  width: 200px;
+  height: 150px;
+  margin-right: 15px;
+  background-color: #000;
+  position: relative;
+  cursor: pointer;
+}
+
+.video-thumbnail {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  background-color: #222;
+}
+
+.play-button {
+  color: #fff;
+  font-size: 30px;
+  background-color: rgba(0, 0, 0, 0.5);
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.3s;
+}
+
+.video-thumbnail:hover .play-button {
+  background-color: rgba(211, 47, 47, 0.7);
+}
+
+.video-title {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background-color: rgba(0, 0, 0, 0.7);
+  color: #fff;
+  padding: 5px 10px;
+  font-size: 12px;
+  text-align: center;
+}
+
+/* 视频播放模态框 */
+.video-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.video-modal-content {
+  width: 80%;
+  max-width: 800px;
+  background-color: #fff;
+  border-radius: 5px;
+  overflow: hidden;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 15px;
+  background-color: #f5f5f5;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.modal-header h3 {
+  margin: 0;
+  font-size: 18px;
+}
+
+.close-button {
+  font-size: 24px;
+  cursor: pointer;
+  color: #555;
+}
+
+.close-button:hover {
+  color: #d32f2f;
+}
+</style>
+```
+
+## 3. 准备资源文件
+
+### 创建资源目录
+
+```bash
+mkdir -p src/assets/images
+mkdir -p src/assets/videos
+```
+
+### 复制资源文件
+
+1. 添加地图图片: 将洛阳老城区地图图片保存为 `src/assets/images/map.jpg`
+2. 添加历史照片: 将历史建筑的照片保存为 `src/assets/images/photo1.jpg` ~ `photo5.jpg`
+3. 添加视频文件: 将方言视频保存为以下文件:
+   - `src/assets/videos/local_situation.mp4`
+   - `src/assets/videos/traditional_festival.mp4`
+   - `src/assets/videos/personal_experience1.mp4`
+   - `src/assets/videos/local_situation2.mp4`
+   - `src/assets/videos/personal_experience2.mp4`
+
+### 视频文件注意事项
+
+对于大型视频文件，不建议直接放在Vue项目的assets目录中，因为这会增加打包体积并影响性能。对于Electron应用，有两种更好的处理方法：
+
+#### 方案A: 将视频放在public目录
+
+1. 创建目录:
+
+   ```bash
+   mkdir -p public/videos
+   ```
+
+2. 将视频文件复制到`public/videos`目录
+
+3. 修改视频数据:
+
+   ```javascript
+   // 视频数据
+   videos: [
+     { id: 'video1', title: '当地情况', src: '/videos/local_situation.mp4' },
+     { id: 'video2', title: '传统节日', src: '/videos/traditional_festival.mp4' },
+     { id: 'video3', title: '个人经历', src: '/videos/personal_experience1.mp4' },
+     { id: 'video4', title: '当地情况', src: '/videos/local_situation2.mp4' },
+     { id: 'video5', title: '个人经历', src: '/videos/personal_experience2.mp4' }
+   ]
+   ```
+
+#### 方案B: 在Electron打包时添加为资源
+
+1. 创建目录:
+
+   ```bash
+   mkdir -p resources/videos
+   ```
+
+2. 将视频文件复制到`resources/videos`目录
+
+3. 修改`electron-builder`配置，将视频作为额外资源:
+
+   ```json
+   "extraResources": [
+     {
+       "from": "backend",
+       "to": "backend"
+     },
+     {
+       "from": "python-env",
+       "to": "python"
+     },
+     {
+       "from": "resources/videos",
+       "to": "videos"
+     }
+   ]
+   ```
+
+4. 修改视频数据，使用electron的资源路径:
+
+   ```javascript
+   // 视频数据 - 导入path模块获取资源路径
+   import path from 'path';
+   import { remote } from 'electron';
+   
+   const resourcePath = process.env.NODE_ENV === 'development' 
+     ? path.join(__dirname, '../../resources/videos') 
+     : path.join(remote.app.getAppPath(), '../videos');
+   
+   // 在data中
+   videos: [
+     { id: 'video1', title: '当地情况', src: path.join(resourcePath, 'local_situation.mp4') },
+     { id: 'video2', title: '传统节日', src: path.join(resourcePath, 'traditional_festival.mp4') },
+     { id: 'video3', title: '个人经历', src: path.join(resourcePath, 'personal_experience1.mp4') },
+     { id: 'video4', title: '当地情况', src: path.join(resourcePath, 'local_situation2.mp4') },
+     { id: 'video5', title: '个人经历', src: path.join(resourcePath, 'personal_experience2.mp4') }
+   ]
+   ```
+
+## 4. 修改路由配置
+
+打开`src/router/index.js`，添加新的路由配置：
+
+```javascript
+import Vue from 'vue'
+import VueRouter from 'vue-router'
+import HomePage from '../views/HomePage.vue'
+// 导入其他已有组件
+
+Vue.use(VueRouter)
+
+const routes = [
+  {
+    path: '/',
+    name: 'Home',
+    component: HomePage
+  },
+  // 其他已有路由
+]
+
+const router = new VueRouter({
+  mode: 'history',
+  base: process.env.BASE_URL,
+  routes
+})
+
+export default router
+```
+
+## 5. 添加必要的Webpack配置
+
+由于我们使用了本地视频文件，需要确保Vue能够正确处理这些文件。修改`vue.config.js`：
+
+```javascript
+module.exports = {
+  publicPath: './',
+  outputDir: 'dist',
+  productionSourceMap: false,
+  
+  // 配置Webpack以处理视频文件
+  chainWebpack: config => {
+    // 处理视频文件
+    config.module
+      .rule('videos')
+      .test(/\.(mp4|webm|ogg|mp3|wav|flac|aac)(\?.*)?$/)
+      .use('file-loader')
+      .loader('file-loader')
+      .options({
+        name: 'media/[name].[hash:8].[ext]'
+      });
+  },
+  
+  // 如果您使用了ESLint，可能需要添加以下配置
+  lintOnSave: process.env.NODE_ENV !== 'production'
+}
+```
+
+## 6. 集成到Electron应用
+
+确保Electron的`main.js`中正确加载了构建后的前端文件：
+
+```javascript
+// 在createWindow函数中
+async function createWindow() {
+  // ...其他代码
+  
+  if (isDev) {
+    // 开发环境：使用开发服务器或构建文件
+    await mainWindow.loadURL('http://localhost:8080');
+  } else {
+    // 生产环境：使用构建好的文件
+    await mainWindow.loadFile(path.join(__dirname, 'frontend/dist/index.html'));
+  }
+  
+  // 允许在生产环境中打开开发者工具
+  mainWindow.webContents.openDevTools();
+}
+```
+
+## 7. 处理视频预览图
+
+为了改进视频缩略图的显示，您可以为每个视频添加一个预览图：
+
+1. 为每个视频制作预览图，保存在`src/assets/images/video-thumbs/`目录下
+2. 更新视频数据对象：
+
+```javascript
+videos: [
+  { 
+    id: 'video1', 
+    title: '当地情况', 
+    src: '/videos/local_situation.mp4',
+    thumb: require('@/assets/images/video-thumbs/local_situation.jpg')
+  },
+  // ...其他视频
+]
+```
+
+1. 在视频缩略图组件中使用预览图：
+
+```html
+<div class="video-thumbnail" @click="playVideo(video)" 
+     :style="{ backgroundImage: `url(${video.thumb})`, backgroundSize: 'cover' }">
+  <div class="play-button">▶</div>
+  <span class="video-title">{{ video.title }}</span>
+</div>
+```
+
+## 8. 构建和测试
+
+1. 构建Vue前端：
+
+```bash
+cd frontend
+npm run build
+```
+
+1. 运行Electron应用：
+
+```bash
+cd ..
+npm run electron:serve
+```
+
+## 完整的应用构建流程
+
+### 步骤1: 准备静态资源
+
+1. 准备地图图片: `src/assets/images/map.jpg`
+2. 准备历史照片: `src/assets/images/photo1.jpg` ~ `photo5.jpg`
+3. 准备视频文件: `public/videos/` 或 `resources/videos/`
+4. 准备视频预览图: `src/assets/images/video-thumbs/`
+
+### 步骤2: 创建并配置HomePage组件
+
+按照上面提供的代码创建`HomePage.vue`组件，并根据您的实际资源路径调整路径引用。
+
+### 步骤3: 配置路由
+
+更新`router/index.js`，确保首页路由配置正确。
+
+### 步骤4: 修改Vue配置
+
+更新`vue.config.js`以正确处理资源文件。
+
+### 步骤5: 构建前端
+
+```bash
+npm run build
+```
+
+### 步骤6: 集成到Electron
+
+按照上面提供的方法修改Electron的`main.js`，确保它能正确加载构建好的前端文件。
+
+### 步骤7: 打包Electron应用
+
+```bash
+npm run build-win
+```
+
+## 注意事项
+
+1. **视频格式兼容性**: 确保视频格式为MP4且使用H.264编码，这是最广泛支持的格式。
+2. **视频文件大小**: 对于Electron应用，建议将大型视频文件放在`extraResources`或`public`目录，而不是直接放在`assets`中以避免增加打包体积。
+3. **静态地图更新**: 如果需要更新地图，只需替换`map.jpg`文件即可。
+4. **资源路径**: Electron中的资源路径处理有特殊要求，特别是在开发环境和生产环境之间切换时。确保使用正确的路径解析方法。
+5. **错误处理**: 添加适当的错误处理，特别是对于视频播放，以防资源无法加载时提供合适的提示。
+
+通过这种方法，您可以创建一个包含静态地图和本地视频的方言首页，无需依赖外部服务，并可以打包在Electron应用中分发。
