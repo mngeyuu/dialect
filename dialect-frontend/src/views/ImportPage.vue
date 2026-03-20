@@ -96,7 +96,7 @@ export default {
 
 <style scoped>
 .import-container {
-  max-width: 640px;
+  max-width: 880px;
   margin: 0 auto;
 }
 
@@ -158,10 +158,12 @@ export default {
 
 .buttons {
   margin-top: 24px;
+  display: flex;
+  justify-content: flex-end;
 }
 
 .btn-primary {
-  padding: 12px 28px;
+  padding: 12px 24px;
   background: var(--color-primary);
   color: #fff;
   border: none;
@@ -242,5 +244,23 @@ code {
   border-radius: 4px;
   font-family: ui-monospace, monospace;
   font-size: 0.88em;
+}
+
+@media (max-width: 768px) {
+  .import-container {
+    max-width: 100%;
+  }
+
+  .card {
+    padding: 20px;
+  }
+
+  .buttons {
+    justify-content: stretch;
+  }
+
+  .btn-primary {
+    width: 100%;
+  }
 }
 </style>

@@ -2,29 +2,28 @@
   <div class="home-page">
     <!-- 主容器 -->
     <div class="main-container">
-      <!-- 左上角资料区域 -->
-      <div class="info-section">
-        <h2 class="dialect-title">河南 洛阳 伊川县【中原官话洛嵩片】 </h2>
-        <div class="dialect-info">
-          <p><span class="label">调查负责人：</span>李燕臻</p>
-          <p><span class="label">单位：</span>兰州大学</p>
-          <p><span class="label">调查简介：</span>伊川县，隶属河南省洛阳市。位于河南省西部，北依洛阳城区，南接嵩县，总面积1059平方千米。截至2022年，伊川县常住人口76.8万人。
+      <div class="top-grid">
+        <!-- 左上角资料区域 -->
+        <div class="info-section">
+          <h2 class="dialect-title">河南 洛阳 伊川县【中原官话洛嵩片】</h2>
+          <div class="dialect-info">
+            <p><span class="label">调查负责人：</span>李燕臻</p>
+            <p><span class="label">单位：</span>兰州大学</p>
+            <p><span class="label">调查简介：</span>伊川县，隶属河南省洛阳市。位于河南省西部，北依洛阳城区，南接嵩县，总面积1059平方千米。截至2022年，伊川县常住人口76.8万人。
 洛阳伊川话，分布在河南省中西部，洛阳市南部，使用人口约76万，为本地普遍通用的方言。伊川话近年来变化较快，新老派词汇差异逐渐增加，特别是年轻人代表的新派，正在向普通话靠拢；而老年人代表的老派，则正在逐渐消逝。</p>
+          </div>
+        </div>
+
+        <!-- 右侧地图区域 (使用静态图片) -->
+        <div class="map-section">
+          <div class="map-header">
+            <span>伊川县地图</span>
+          </div>
+          <div class="static-map">
+            <img src="images/map.jpg" alt="洛阳老城区地图">
+          </div>
         </div>
       </div>
-
-      <!-- 右侧地图区域 (使用静态图片) -->
-      <div class="map-section">
-        <div class="map-header">
-          <span>伊川县地图</span>
-        </div>
-        <div class="static-map">
-          <img src="images/map.jpg" alt="洛阳老城区地图">
-        </div>
-      </div>
-
-      <!-- 清除浮动 -->
-      <div class="clearfix"></div>
 
       <!-- 照片区域 -->
       <div class="photos-section">
@@ -140,22 +139,25 @@ export default {
   background: var(--color-bg-card);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-md);
-  padding: 28px;
+  padding: 24px;
   border: 1px solid var(--color-border);
   position: relative;
 }
 
-/* 资料 + 地图 两栏 */
+.top-grid {
+  display: grid;
+  grid-template-columns: minmax(320px, 1fr) minmax(360px, 1.2fr);
+  gap: 20px;
+  align-items: stretch;
+}
+
+/* 资料 + 地图 两栏（统一卡片风格） */
 .info-section {
-  float: left;
-  width: 42%;
-  min-height: 340px;
+  min-height: 360px;
   padding: 20px;
   border-radius: var(--radius-md);
-  background: var(--color-primary-light);
+  background: linear-gradient(180deg, #fff 0%, var(--color-primary-light) 100%);
   border: 1px solid var(--color-border);
-  display: flex;
-  flex-direction: column;
 }
 
 .dialect-title {
@@ -186,13 +188,12 @@ export default {
 }
 
 .map-section {
-  float: right;
-  width: 55%;
-  height: 340px;
+  height: 360px;
   border-radius: var(--radius-md);
   overflow: hidden;
   border: 1px solid var(--color-border);
   box-shadow: var(--shadow-sm);
+  background: #fff;
 }
 
 .map-header {
@@ -215,15 +216,11 @@ export default {
   object-fit: cover;
 }
 
-.clearfix {
-  clear: both;
-}
-
 /* 照片区域 */
 .photos-section {
   margin-top: 32px;
   padding-top: 24px;
-  border-top: 2px solid var(--color-border-strong);
+  border-top: 1px solid var(--color-border);
 }
 
 .photos-section h2 {
@@ -267,7 +264,7 @@ export default {
 .videos-section {
   margin-top: 32px;
   padding-top: 24px;
-  border-top: 2px solid var(--color-border-strong);
+  border-top: 1px solid var(--color-border);
 }
 
 .videos-section h2 {
@@ -394,11 +391,8 @@ export default {
 
 /* 响应式 */
 @media (max-width: 991px) {
-  .info-section,
-  .map-section {
-    float: none;
-    width: 100%;
-    margin-bottom: 20px;
+  .top-grid {
+    grid-template-columns: 1fr;
   }
 
   .map-section {

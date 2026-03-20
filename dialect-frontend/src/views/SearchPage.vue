@@ -481,6 +481,7 @@ export default {
   width: 100%;
   border-collapse: collapse;
   font-size: 0.9rem;
+  table-layout: fixed;
 }
 
 .data-table th,
@@ -503,6 +504,27 @@ export default {
 .data-table td:nth-child(4),
 .data-table td:nth-child(6) {
   text-align: center;
+}
+
+.data-table th:nth-child(1),
+.data-table td:nth-child(1) { width: 90px; }
+.data-table th:nth-child(2),
+.data-table td:nth-child(2) { width: 180px; }
+.data-table th:nth-child(3),
+.data-table td:nth-child(3) { width: 220px; }
+.data-table th:nth-child(4),
+.data-table td:nth-child(4) { width: 110px; }
+.data-table th:nth-child(5),
+.data-table td:nth-child(5) { width: 220px; }
+.data-table th:nth-child(6),
+.data-table td:nth-child(6) { width: 110px; }
+
+.data-table td:nth-child(2),
+.data-table td:nth-child(3),
+.data-table td:nth-child(5) {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .data-table tbody tr {
