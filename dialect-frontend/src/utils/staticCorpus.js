@@ -87,7 +87,9 @@ export async function loadStaticCorpusIntoStorage () {
       if (!hasAnyPhonetic(list)) {
         finalList = mergeKeepLocalPhonetic(list, localList)
       }
-    } catch (_) {}
+    } catch (_) {
+      // 忽略 localStorage 读取异常，继续使用静态语料
+    }
 
     localStorage.setItem(STORAGE_KEY, JSON.stringify(finalList))
     return true
