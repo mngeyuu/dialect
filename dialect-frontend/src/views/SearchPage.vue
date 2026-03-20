@@ -497,6 +497,14 @@ export default {
   white-space: nowrap;
 }
 
+/* 语音列表头与内容居中，避免和按钮列错位 */
+.data-table th:nth-child(4),
+.data-table th:nth-child(6),
+.data-table td:nth-child(4),
+.data-table td:nth-child(6) {
+  text-align: center;
+}
+
 .data-table tbody tr {
   transition: background 0.15s;
 }

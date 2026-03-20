@@ -555,6 +555,14 @@ export default {
   white-space: nowrap;
 }
 
+/* 语音列表头与内容都居中，保证和播放按钮对齐 */
+.data-table th:nth-child(4),
+.data-table th:nth-child(6),
+.data-table td:nth-child(4),
+.data-table td:nth-child(6) {
+  text-align: center;
+}
+
 /* 固定各列宽度（当前列顺序：编号/词汇/老派词汇/老派语音/新派词汇/新派语音） */
 .data-table th:nth-child(1),
 .data-table td:nth-child(1) { width: 90px; }
