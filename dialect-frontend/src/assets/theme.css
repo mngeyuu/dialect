@@ -1,0 +1,22 @@
+/* 与 App.vue 中的 :root 变量保持一致（大红色主色） */
+:root {
+  --color-bg: #f8f4f2;
+  --color-bg-card: #ffffff;
+  --color-primary: #c82704;
+  --color-primary-hover: #a71f03;
+  --color-primary-light: rgba(200, 39, 4, 0.08);
+  --color-accent: #c82704;
+  --color-accent-soft: rgba(200, 39, 4, 0.12);
+  --color-text: #2c2c2c;
+  --color-text-secondary: #5c5c5c;
+  --color-border: #e8e2da;
+  --color-border-strong: #d4ccc0;
+  --shadow-sm: 0 1px 3px rgba(200, 39, 4, 0.06);
+  --shadow-md: 0 4px 12px rgba(200, 39, 4, 0.08);
+  --shadow-lg: 0 8px 24px rgba(200, 39, 4, 0.1);
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --font-sans: "PingFang SC", "Microsoft YaHei", "Noto Sans SC", sans-serif;
+  --font-serif: "Noto Serif SC", "Source Han Serif SC", "SimSun", serif;
+}

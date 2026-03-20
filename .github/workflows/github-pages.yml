@@ -24,12 +24,12 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      # 勿写 cache-dependency-path：若未提交 package-lock.json 或路径不对会报
+      # "unable to cache dependencies"。需要缓存时在确保 lock 文件已 push 后再加回。
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: npm
-          cache-dependency-path: dialect-frontend/package-lock.json
 
       - name: Install & build
         working-directory: dialect-frontend
