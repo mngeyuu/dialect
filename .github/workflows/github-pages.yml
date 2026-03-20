@@ -34,7 +34,8 @@ jobs:
       - name: Install & build
         working-directory: dialect-frontend
         run: |
-          npm ci
+          # Pages 仅需前端构建，跳过 postinstall(electron-builder) 以避免 CI 失败
+          npm ci --ignore-scripts
           npm run build
 
       - name: Upload artifact
