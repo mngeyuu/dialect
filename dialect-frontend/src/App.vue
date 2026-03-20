@@ -40,6 +40,7 @@ export default {
   --radius-lg: 14px;
   --font-sans: "PingFang SC", "Microsoft YaHei", "Noto Sans SC", sans-serif;
   --font-serif: "Noto Serif SC", "Source Han Serif SC", "SimSun", serif;
+  --font-nav: "Noto Sans SC", "PingFang SC", "Microsoft YaHei", sans-serif;
 }
 
 * {

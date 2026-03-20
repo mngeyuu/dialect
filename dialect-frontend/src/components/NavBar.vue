@@ -29,6 +29,7 @@ export default {
   position: sticky;
   top: 0;
   z-index: 100;
+  font-family: var(--font-nav);
 }
 
 .navbar-inner {
@@ -59,14 +60,12 @@ export default {
   font-size: 1.25rem;
   font-weight: 600;
   letter-spacing: 0.02em;
-  font-family: var(--font-sans);
 }
 
 .logo-sub {
   font-size: 0.75rem;
   opacity: 0.88;
   letter-spacing: 0.08em;
-  font-family: var(--font-sans);
 }
 
 .nav-links {
@@ -82,7 +81,6 @@ export default {
   text-decoration: none;
   font-weight: 500;
   font-size: 0.95rem;
-  font-family: var(--font-sans);
   padding: 10px 18px;
   border-radius: var(--radius-sm);
   transition: background 0.2s, color 0.2s;
