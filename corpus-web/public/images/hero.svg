@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 360" fill="none">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#e8dfd4"/>
+      <stop offset="100%" stop-color="#f4f1eb"/>
+    </linearGradient>
+    <linearGradient id="sun" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#fcd34d"/>
+      <stop offset="100%" stop-color="#f59e0b"/>
+    </linearGradient>
+  </defs>
+  <rect width="480" height="360" fill="url(#sky)"/>
+  <circle cx="360" cy="90" r="48" fill="url(#sun)" opacity=".9"/>
+  <path d="M0 240 Q120 200 240 230 T480 220V360H0Z" fill="#78716c" opacity=".25"/>
+  <path d="M0 260 Q160 230 280 250 T480 245V360H0Z" fill="#57534e" opacity=".35"/>
+  <path d="M60 200 L100 120 L140 200 Z" fill="#b91c1c" opacity=".2"/>
+  <path d="M320 210 L360 140 L400 210 Z" fill="#b91c1c" opacity=".15"/>
+  <ellipse cx="240" cy="300" rx="180" ry="8" fill="#b45309" opacity=".12"/>
+  <text x="240" y="340" text-anchor="middle" font-family="Noto Serif SC, serif" font-size="14" fill="#78716c">乡音 · 记录</text>
+</svg>

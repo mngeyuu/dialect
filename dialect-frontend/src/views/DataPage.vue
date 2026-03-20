@@ -57,13 +57,14 @@
             <div v-if="item.word" class="audio-button-wrapper">
               <audio
                 :ref="el => setAudioRef(`old_audio_${item.code}`, el)"
-                :src="getOldAudioPath(item)"
+                :src="getAudioSrcFor(item, 'old')"
                 preload="none"
-                @ended="handleAudioEnded(`old_audio_${item.code}`)">
+                @ended="handleAudioEnded(`old_audio_${item.code}`)"
+                @error="onDialectAudioError(item, 'old', `old_audio_${item.code}`)">
               </audio>
               <button
                 class="play-button"
-                @click="togglePlay(`old_audio_${item.code}`)"
+                @click="togglePlay(`old_audio_${item.code}`, item, 'old')"
                 :class="{ 'playing': isPlaying[`old_audio_${item.code}`] }">
                 <span v-if="isPlaying[`old_audio_${item.code}`]" class="material-icons">pause</span>
                 <span v-else class="material-icons">play_arrow</span>
@@ -77,13 +78,14 @@
             <div v-if="item.word" class="audio-button-wrapper">
               <audio
                 :ref="el => setAudioRef(`new_audio_${item.code}`, el)"
-                :src="getNewAudioPath(item)"
+                :src="getAudioSrcFor(item, 'new')"
                 preload="none"
-                @ended="handleAudioEnded(`new_audio_${item.code}`)">
+                @ended="handleAudioEnded(`new_audio_${item.code}`)"
+                @error="onDialectAudioError(item, 'new', `new_audio_${item.code}`)">
               </audio>
               <button
                 class="play-button"
-                @click="togglePlay(`new_audio_${item.code}`)"
+                @click="togglePlay(`new_audio_${item.code}`, item, 'new')"
                 :class="{ 'playing': isPlaying[`new_audio_${item.code}`] }">
                 <span v-if="isPlaying[`new_audio_${item.code}`]" class="material-icons">pause</span>
                 <span v-else class="material-icons">play_arrow</span>
@@ -115,8 +117,8 @@
     <div v-if="isDev && displayedData.length > 0" class="debug-info">
       <h3>音频文件路径示例：</h3>
       <div>
-        <p><strong>老派音频路径:</strong> {{ getOldAudioPath(displayedData[0]) }}</p>
-        <p><strong>新派音频路径:</strong> {{ getNewAudioPath(displayedData[0]) }}</p>
+        <p><strong>老派候选 URL（先空格后下划线）:</strong> {{ formatAudioCandidates(displayedData[0], 'old') }}</p>
+        <p><strong>新派候选 URL:</strong> {{ formatAudioCandidates(displayedData[0], 'new') }}</p>
         <button @click="testAudioPath">测试音频路径</button>
       </div>
     </div>
@@ -125,6 +127,8 @@
 
 <script>
 /* eslint-disable */
+import { getDialectAudioSrc, getDialectAudioSrcCandidates } from '@/utils/audioPaths'
+
 export default {
   data() {
     return {
@@ -137,6 +141,7 @@ export default {
       isLoading: false,
       isPlaying: {},
       audioRefs: {},
+      audioCandidateIdx: {},
       isDev: process.env.NODE_ENV === 'development'
     };
   },
@@ -169,9 +174,38 @@ export default {
       document.head.appendChild(link);
     },
 
+    audioSideKey (item, side) {
+      return `${side}_${item.code}`
+    },
+
+    getAudioSrcFor (item, side) {
+      const list = getDialectAudioSrcCandidates(item, side)
+      const k = this.audioSideKey(item, side)
+      const idx = this.audioCandidateIdx[k] ?? 0
+      return list[idx] || list[0] || ''
+    },
+
+    formatAudioCandidates (item, side) {
+      return getDialectAudioSrcCandidates(item, side).join('\n')
+    },
+
+    onDialectAudioError (item, side, audioKey) {
+      const list = getDialectAudioSrcCandidates(item, side)
+      if (list.length < 2) return
+      const k = this.audioSideKey(item, side)
+      const idx = this.audioCandidateIdx[k] ?? 0
+      if (idx + 1 >= list.length) return
+      this.audioCandidateIdx[k] = idx + 1
+      this.$nextTick(() => {
+        const el = this.audioRefs[audioKey]
+        if (!el) return
+        el.load()
+        el.play().catch(() => {})
+      })
+    },
+
     // 切换音频播放状态
-    togglePlay(audioKey) {
-      // 停止所有其他音频
+    togglePlay (audioKey, item, side) {
       Object.keys(this.audioRefs).forEach(key => {
         if (key !== audioKey && this.audioRefs[key]) {
           this.audioRefs[key].pause();
@@ -179,21 +213,32 @@ export default {
         }
       });
 
-      // 获取当前音频元素
       const audioElement = this.audioRefs[audioKey];
       if (!audioElement) return;
 
-      // 切换播放状态
       if (audioElement.paused) {
-        const playPromise = audioElement.play();
-        if (playPromise !== undefined) {
-          playPromise.then(() => {
-            this.isPlaying[audioKey] = true;
-          }).catch(error => {
-            console.error('播放失败:', error);
-            alert('播放音频失败，可能是由于浏览器限制或文件不存在。');
-          });
-        }
+        const k = this.audioSideKey(item, side)
+        delete this.audioCandidateIdx[k]
+        this.$nextTick(() => {
+          audioElement.load()
+          const playPromise = audioElement.play();
+          if (playPromise !== undefined) {
+            playPromise.then(() => {
+              this.isPlaying[audioKey] = true;
+            }).catch((error) => {
+              console.error('播放失败:', error)
+              const src = audioElement.currentSrc || audioElement.src || '(无地址)'
+              alert(
+                '无法播放该条录音。\n\n' +
+                '常见原因：\n' +
+                '1. 尚未部署对应 mp3：请放到 public/audio/old_dialect 与 new_dialect，并重新构建/推送。\n' +
+                '2. 文件名须与「词汇」一致；支持「0001 新派 太阳.mp3」或「0001_新派_太阳.mp3」两种。\n' +
+                '3. 也可在数据里填写 old_dialect_audio / new_dialect_audio 为完整 URL 或相对路径。\n\n' +
+                `当前请求地址：\n${src}`
+              )
+            });
+          }
+        })
       } else {
         audioElement.pause();
         this.isPlaying[audioKey] = false;
@@ -217,48 +262,12 @@ export default {
       document.head.appendChild(style);
     },
 
-    // 修改获取老派音频路径方法
     getOldAudioPath(item) {
-      if (!item || !item.code || !item.word) return '';
-
-      // 构建文件名: 0001 老派 太阳.mp3（小写扩展名，与 GitHub Pages 一致）
-      const code = this.formatCode(item.code);
-      const filename = `${code} 老派 ${item.word}.mp3`;
-
-      // 判断是否在Electron环境中
-      if (window.electronAPI) {
-        // 在Electron环境中，使用相对路径
-        return `old_dialect/${filename}`;
-      } else {
-        // 在Web环境中，使用之前的路径
-        return `./audio/old_dialect/${filename}`;
-      }
+      return getDialectAudioSrc(item, 'old')
     },
 
-    // 修改获取新派音频路径方法
     getNewAudioPath(item) {
-      if (!item || !item.code || !item.word) return '';
-
-      const code = this.formatCode(item.code);
-      const filename = `${code} 新派 ${item.word}.mp3`;
-
-      // 判断是否在Electron环境中
-      if (window.electronAPI) {
-        // 在Electron环境中，使用相对路径
-        return `new_dialect/${filename}`;
-      } else {
-        // 在Web环境中，使用之前的路径
-        return `./audio/new_dialect/${filename}`;
-      }
-    },
-
-
-    // 格式化编号为4位数字 (例如: 1 -> 0001)
-    formatCode(code) {
-      const codeNum = parseInt(code, 10);
-      if (isNaN(codeNum)) return code;
-
-      return codeNum.toString().padStart(4, '0');
+      return getDialectAudioSrc(item, 'new')
     },
 
     // 从本地存储加载数据
@@ -437,10 +446,10 @@ export default {
       }
 
       const item = this.displayedData[0];
-      const oldPath = this.getOldAudioPath(item);
-      const newPath = this.getNewAudioPath(item);
+      const oldList = getDialectAudioSrcCandidates(item, 'old').join('\n')
+      const newList = getDialectAudioSrcCandidates(item, 'new').join('\n')
 
-      alert(`测试音频路径:\n\n老派: ${oldPath}\n\n新派: ${newPath}\n\n请在浏览器开发者工具的网络选项卡中检查这些文件是否能正确加载。`);
+      alert(`测试音频路径（先空格后下划线，自动依次尝试）:\n\n老派:\n${oldList}\n\n新派:\n${newList}\n\n请在开发者工具「网络」中检查上述 URL 是否能 200 加载。`);
     }
   }
 };
